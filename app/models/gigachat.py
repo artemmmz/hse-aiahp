@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Optional
@@ -62,6 +63,7 @@ class Gigachat(BaseModel):
             'Authorization': f'Basic {self.__token}',
             'RqUID': str(uuid4()),
         }
+        cert = os.path.abspath(os.path.join(os.getcwd(), "full_chain.cer"))
 
         response = requests.post(url, headers=headers, data=data, verify=False)
 
