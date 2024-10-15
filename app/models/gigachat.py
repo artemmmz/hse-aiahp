@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Optional
+from uuid import uuid4
 
 import requests
 
@@ -23,6 +24,7 @@ class Gigachat(BaseModel):
     def __init__(
             self,
             token: str,
+            client_id: str,
             model: GigachatModels = GigachatModels.LITE,
             scope: GigachatScopes = GigachatScopes.PERSON,
             system_prompt: Optional[str] = None,
@@ -40,6 +42,7 @@ class Gigachat(BaseModel):
         self.__token = token
         self.__model = model
         self.__scope = scope
+        self.__client_id = client_id
         self.timeout = timeout
 
         self.__access_token = None
@@ -52,23 +55,23 @@ class Gigachat(BaseModel):
         Update access key. USE ONLY AFTER INITIALIZATION
         """
         url = 'https://ngw.devices.sberbank.ru:9443/api/v2/oauth'
-        data = f'scope={self.__scope}'
+        data = f'scope={self.__scope.value}'
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json',
-            'Authorization': 'Basic authorization_key',
-            'RqUID': self.__token,
+            'Authorization': f'Basic {self.__token}',
+            'RqUID': str(uuid4()),
         }
 
-        response = requests.post(url, headers=headers, data=data)
+        response = requests.post(url, headers=headers, data=data, verify=False)
 
         if response.status_code != 200:
             return
 
         result = response.json()
 
-        self.token_expires: int = result['expires']
-        self.__access_token: str = result['__access_token']
+        self.token_expires: int = result['expires_at']
+        self.__access_token: str = result['access_token']
 
     def __check_access_key(self) -> None:
         """
