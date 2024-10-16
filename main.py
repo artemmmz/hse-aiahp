@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -8,6 +9,7 @@ from app.utils.submit import generate_submit
 
 if __name__ == "__main__":
     load_dotenv()
+    ROOT_DIR = Path(__file__).resolve().parent
 
     system_prompt = """
     Ты - профессиональный программист и ментор. Давай очень короткие ответы о синтаксических ошибках в коде, если они есть.
@@ -24,8 +26,8 @@ if __name__ == "__main__":
 
 
     generate_submit(
-        test_solutions_path="data/raw/test/solutions.xlsx",
+        test_solutions_path=(ROOT_DIR / "data/raw/test/solutions.xlsx").as_posix(),
         predict_func=predict,
-        save_path="data/processed/submission.csv",
+        save_path=(ROOT_DIR / "data/processed/submission.csv").as_posix(),
         use_tqdm=True,
     )
